@@ -21,7 +21,7 @@ public class MapSearchControllerTests {
     @Test
     public void HelloWorldResonseTest() throws Exception{
 
-        webTestClient.get().uri("/mapsearch/helloworld/ddolsoon")
+        webTestClient.get().uri("/helloworld/ddolsoon")
                 .accept(MediaType.TEXT_PLAIN)
                 .exchange()
                 .expectStatus().isOk()

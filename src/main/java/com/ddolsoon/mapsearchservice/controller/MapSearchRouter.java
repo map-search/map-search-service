@@ -16,9 +16,9 @@ public class MapSearchRouter {
 
     @Bean
     public RouterFunction<ServerResponse> routes(MapSearchHandler handler) {
-        return RouterFunctions.route(GET("/mapsearch/helloworld/{name}"), handler::helloworld)
-                .andRoute(GET("/mapsearch/keywordsearch/{keyword}"), handler::searchWithKeyword)
-                .andRoute(GET("/mapsearch/keywordsearch/{keyword}/{latitude}/{longitude}"), handler::searchWithKeywordAndLatLon)
+        return RouterFunctions.route(GET("/helloworld/{name}"), handler::helloworld)
+                .andRoute(GET("/keywordsearch/{keyword}"), handler::searchWithKeyword)
+                .andRoute(GET("/keywordsearch/{keyword}/{latitude}/{longitude}"), handler::searchWithKeywordAndLatLon)
                 ;
 
     }
