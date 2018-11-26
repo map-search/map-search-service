@@ -1,4 +1,4 @@
-package com.ddolsoon.mapsearchservice;
+package com.naver.mapsearch.mapsearchservice;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

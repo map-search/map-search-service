@@ -1,4 +1,4 @@
-package com.ddolsoon.mapsearchservice.controller;
+package com.naver.mapsearch.mapsearchservice.controller;
 
 
 import org.springframework.context.annotation.Bean;

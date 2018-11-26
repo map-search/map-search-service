@@ -1,4 +1,4 @@
-package com.ddolsoon.mapsearchservice;
+package com.naver.mapsearch.mapsearchservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

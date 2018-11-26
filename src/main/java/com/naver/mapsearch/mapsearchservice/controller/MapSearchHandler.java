@@ -1,7 +1,7 @@
-package com.ddolsoon.mapsearchservice.controller;
+package com.naver.mapsearch.mapsearchservice.controller;
 
 
-import com.ddolsoon.mapsearchservice.domain.MapSearch;
+import com.naver.mapsearch.mapsearchservice.domain.MapSearch;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
