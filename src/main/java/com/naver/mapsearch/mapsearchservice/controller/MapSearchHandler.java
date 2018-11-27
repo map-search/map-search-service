@@ -2,6 +2,8 @@ package com.naver.mapsearch.mapsearchservice.controller;
 
 
 import com.naver.mapsearch.mapsearchservice.domain.MapSearch;
+import com.naver.mapsearch.mapsearchservice.service.MapSearchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -9,6 +11,9 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class MapSearchHandler {
+
+    @Autowired
+    MapSearchService mapSearchService;
 
     public Mono<ServerResponse> helloworld(ServerRequest request) {
         String name = request.pathVariable("name");

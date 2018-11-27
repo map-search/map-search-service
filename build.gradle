@@ -31,4 +31,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client
     compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '6.5.1'
+    compileOnly('org.projectlombok:lombok:1.18.0')
+
 }
