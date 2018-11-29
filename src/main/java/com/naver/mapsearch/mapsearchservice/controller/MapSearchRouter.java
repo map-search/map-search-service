@@ -18,7 +18,7 @@ public class MapSearchRouter {
     public RouterFunction<ServerResponse> routes(MapSearchHandler handler) {
         return RouterFunctions.route(GET("/helloworld/{name}"), handler::helloworld)
                 .andRoute(GET("/keywordsearch/{keyword}"), handler::searchWithKeyword)
-                .andRoute(GET("/keywordsearch/{keyword}/{latitude}/{longitude}"), handler::searchWithKeywordAndLatLon)
+                .andRoute(GET("/keywordsearch/{ip}/{keyword}/{latitude}/{longitude}"), handler::searchWithKeywordAndLatLon)
                 ;
 
     }

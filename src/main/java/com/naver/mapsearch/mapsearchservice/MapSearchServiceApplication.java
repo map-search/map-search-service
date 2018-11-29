@@ -8,10 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @Slf4j
 public class MapSearchServiceApplication {
 
+
     public static void main(String[] args) {
 
         SpringApplication.run(MapSearchServiceApplication.class, args);
-
-        //log.info("helloworld{}", 100);
     }
 }

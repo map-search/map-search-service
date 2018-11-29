@@ -1,7 +1,7 @@
 package com.naver.mapsearch.mapsearchservice.repository;
 
-import com.naver.mapsearch.mapsearchservice.domain.LatLon;
 import com.naver.mapsearch.mapsearchservice.domain.MapSearch;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -14,36 +14,31 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Repository
 public class MapSearchRepository {
 
     private final String INDEX = "tests";
-    private final String TYPE = "test";
+
+    private final RestHighLevelClient restHighLevelClient;
 
     @Autowired
-    private RestHighLevelClient restHighLevelClient;
-
-    public Mono<List<MapSearch>> searchWithKeyword(String keyword) {
-
-        return  Mono.create(sink -> {
-            try {
-                searchQueryByKeyword(keyword, listenerToSink(sink));
-            } catch(Exception e) {
-                sink.error(e);
-            }
-        });
+    public MapSearchRepository(RestHighLevelClient restHighLevelClient) {
+        this.restHighLevelClient = restHighLevelClient;
     }
 
-    private void searchQueryByKeyword(String keyword, ActionListener<SearchTemplateResponse> listener)
-            throws Exception{
+    public Flux<MapSearch> searchWithKeyword(String keyword) {
+        return  Flux.create(sink -> searchQueryByKeyword(keyword, listenerToSink(sink)));
+    }
+
+    private void searchQueryByKeyword(String keyword, ActionListener<SearchTemplateResponse> listener) {
 
         SearchTemplateRequest request = new SearchTemplateRequest();
         request.setRequest(new SearchRequest(INDEX));
@@ -59,7 +54,7 @@ public class MapSearchRepository {
         searchQuery += "}";
         searchQuery = searchQuery.replace("'","\"");
         request.setScript(searchQuery);
-        System.out.println(searchQuery);
+        log.info("searchQuery: {}", searchQuery);
 
 
         Map<String, Object> scriptParams = new HashMap<>();
@@ -73,19 +68,12 @@ public class MapSearchRepository {
 
 
 
-    public Mono<List<MapSearch>> searchWithKeywordAndLatLon(String keyword, Double latitude, Double longitude) {
-
-        return  Mono.create(sink -> {
-            try {
-                searchQueryByKeywordAndLatLon(keyword, latitude, longitude, listenerToSink(sink));
-            } catch(Exception e) {
-                sink.error(e);
-            }
-        });
+    public Flux<MapSearch> searchWithKeywordAndLatLon(String keyword, Double latitude, Double longitude) {
+        return  Flux.create(sink -> searchQueryByKeywordAndLatLon(keyword, latitude, longitude, listenerToSink(sink)));
     }
 
     private void searchQueryByKeywordAndLatLon(String keyword, Double latitude, Double longitude,
-                                               ActionListener<SearchTemplateResponse> listener)throws Exception{
+                                               ActionListener<SearchTemplateResponse> listener) {
 
         SearchTemplateRequest request = new SearchTemplateRequest();
         request.setRequest(new SearchRequest(INDEX));
@@ -126,22 +114,20 @@ public class MapSearchRepository {
         searchQuery = searchQuery.replace("'","\"");
         searchQuery = searchQuery.replace("?","\'");
 
-
-
         Map<String, Object> scriptParams = new HashMap<>();
         scriptParams.put("keyword", keyword);
         scriptParams.put("latitude", latitude);
         scriptParams.put("longitude", longitude);
         scriptParams.put("size", 100);
         request.setScriptParams(scriptParams);
-        System.out.println(scriptParams);
+        log.info("scriptParams: {}", scriptParams);
         request.setScript(searchQuery);
-        System.out.println(searchQuery);
+        log.info("searchQuery : {}", searchQuery);
 
         restHighLevelClient.searchTemplateAsync(request, RequestOptions.DEFAULT, listener);
     }
 
-    private ActionListener<SearchTemplateResponse> listenerToSink(MonoSink<List<MapSearch>> sink) {
+    private ActionListener<SearchTemplateResponse> listenerToSink(FluxSink<MapSearch> sink) {
         return new ActionListener<SearchTemplateResponse>() {
             @Override
             public void onResponse(SearchTemplateResponse response) {
@@ -149,30 +135,26 @@ public class MapSearchRepository {
                 SearchResponse searchResponse = response.getResponse();
                 SearchHits hits = searchResponse.getHits();
                 SearchHit[] searchHits = hits.getHits();
-                System.out.println(searchHits);
+                log.info("searchHits: {}", searchHits);
 
-                List<MapSearch> mapSearchList = new ArrayList<>();
                 for (SearchHit hit : searchHits) {
 
                     // do something with the SearchHit
                     Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-                    System.out.println(sourceAsMap);
+                    log.info("sourceAsMap: {}", sourceAsMap);
                     String map_location = (String) sourceAsMap.get("location");
                     List<String> map_location_tokens = (List<String>) sourceAsMap.get("location_tokens");
                     Map<String, Double> map_latlon = (Map<String, Double>) sourceAsMap.get("latlon");
                     Double map_latitude = map_latlon.get("lat");
                     Double map_longitude = map_latlon.get("lon");
-                    System.out.println(map_latitude);
-                    System.out.println(map_longitude);
+                    log.info("map_latitude: {}", map_latitude);
+                    log.info("map_longitude: {}", map_longitude);
                     MapSearch mapSearch  = new MapSearch(map_location, map_location_tokens,map_latitude, map_longitude);
 
-                    mapSearchList.add(mapSearch);
+                    sink.next(mapSearch);
                 }
 
-
-                System.out.println(mapSearchList);
-
-                sink.success(mapSearchList);
+                sink.complete();
             }
 
             @Override
@@ -181,6 +163,4 @@ public class MapSearchRepository {
             }
         };
     }
-
-
 }

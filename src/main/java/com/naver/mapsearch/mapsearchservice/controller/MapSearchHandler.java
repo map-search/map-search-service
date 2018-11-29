@@ -3,6 +3,7 @@ package com.naver.mapsearch.mapsearchservice.controller;
 
 import com.naver.mapsearch.mapsearchservice.domain.MapSearch;
 import com.naver.mapsearch.mapsearchservice.service.MapSearchService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -13,39 +14,46 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class MapSearchHandler {
 
+    private final MapSearchService mapSearchService;
+
     @Autowired
-    MapSearchService mapSearchService;
+    public MapSearchHandler(MapSearchService mapSearchService) {
+        this.mapSearchService = mapSearchService;
+    }
 
-    public Mono<ServerResponse> helloworld(ServerRequest request) {
+    Mono<ServerResponse> helloworld(ServerRequest request) {
         String name = request.pathVariable("name");
-        Mono<String> helloworldMono = Mono.just("hello, world!! your name is " + name);
-        return ServerResponse.ok().body(helloworldMono, String.class);
+        Mono<String> helloworld = Mono.just("hello, world!! your name is " + name);
+        return ServerResponse.ok().body(helloworld, String.class);
     }
 
-    public Mono<ServerResponse> searchWithKeyword(ServerRequest serverRequest) {
+    Mono<ServerResponse> searchWithKeyword(ServerRequest serverRequest) {
 
         String keyword = serverRequest.pathVariable("keyword");
 
-        Mono<List<MapSearch>> searchResult = mapSearchService.searchWithKeyword(keyword); //MapSearchRepository 결과값
+        Flux<MapSearch> searchResult = mapSearchService.searchWithKeyword(keyword); //MapSearchRepository 결과값
 
-        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(searchResult.flatMapMany(Flux::fromIterable), MapSearch.class);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(searchResult, MapSearch.class);
     }
 
-    public Mono<ServerResponse> searchWithKeywordAndLatLon(ServerRequest serverRequest) {
+    Mono<ServerResponse> searchWithKeywordAndLatLon(ServerRequest serverRequest) {
 
+        String ip = serverRequest.pathVariable("ip");
         String keyword = serverRequest.pathVariable("keyword");
-        Double latitude = Double.parseDouble(serverRequest.pathVariable("latitude"));
-        Double longitude = Double.parseDouble(serverRequest.pathVariable("longitude"));
+        double latitude = Double.parseDouble(serverRequest.pathVariable("latitude"));
+        double longitude = Double.parseDouble(serverRequest.pathVariable("longitude"));
 
-        System.out.println("keyword : " + keyword);
-        System.out.println("latitude : " + latitude);
-        System.out.println("longitude : " + longitude);
+        log.info("ip: {}", ip);
+        log.info("keyword:  {}", keyword);
+        log.info("latitude: {}", latitude);
+        log.info("longitude: {}", longitude);
 
-        Mono<List<MapSearch>> searchResult = mapSearchService.searchWithKeywordAndLatLon(keyword, latitude, longitude); //MapSearchRepository 결과값
+        Flux<MapSearch> searchResult = mapSearchService.searchWithKeywordAndLatLon(ip,keyword, latitude, longitude); //MapSearchRepository 결과값
 
-        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(searchResult.flatMapMany(Flux::fromIterable), MapSearch.class);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(searchResult, MapSearch.class);
     }
 }

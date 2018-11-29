@@ -33,4 +33,7 @@ dependencies {
     compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '6.5.1'
     compileOnly('org.projectlombok:lombok:1.18.0')
 
+    // https://mvnrepository.com/artifact/net.logstash.logback/logstash-logback-encoder
+    compile group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '5.2'
+
 }

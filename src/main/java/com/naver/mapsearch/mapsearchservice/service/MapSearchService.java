@@ -5,6 +5,7 @@ import com.naver.mapsearch.mapsearchservice.repository.MapSearchLogRepository;
 import com.naver.mapsearch.mapsearchservice.repository.MapSearchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -19,13 +20,15 @@ public class MapSearchService {
     MapSearchLogRepository mapSearchLogRepository;
 
 
-    public Mono<List<MapSearch>> searchWithKeyword(String keyword) {
+    public Flux<MapSearch> searchWithKeyword(String keyword) {
 
         return mapSearchRepository.searchWithKeyword(keyword);
     }
 
-    public Mono<List<MapSearch>> searchWithKeywordAndLatLon(String keyword, Double latitude, Double longitude) {
+    public Flux<MapSearch> searchWithKeywordAndLatLon(String ip,String keyword, Double latitude, Double longitude) {
 
-        return mapSearchRepository.searchWithKeywordAndLatLon(keyword,latitude,longitude);
+        mapSearchLogRepository.saveSearchLog(ip, keyword, latitude, longitude);
+
+        return mapSearchRepository.searchWithKeywordAndLatLon(keyword, latitude, longitude);
     }
 }
