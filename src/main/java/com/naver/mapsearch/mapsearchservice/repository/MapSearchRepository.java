@@ -93,39 +93,39 @@ public class MapSearchRepository {
         String searchQuery = "";
         searchQuery += "{";
         searchQuery += "    'query' : {";
-        searchQuery += "        'bool' : {";
-        searchQuery += "            'should': [";
-        searchQuery += "                {";
-        searchQuery += "                    'term': {";
-        searchQuery += "                        'location' : '{{keyword}}'";
-        searchQuery += "                    }";
-        searchQuery += "                },";
-        searchQuery += "                {";
-        searchQuery += "                    'term' : {";
-        searchQuery += "                        'location_tokens': '{{keyword}}'";
-        searchQuery += "                    }";
+        searchQuery += "        'function_score' : {";
+        searchQuery += "            'query' : {";
+        searchQuery += "                'bool' : {";
+        searchQuery += "                    'should' : [";
+        searchQuery += "                        {";
+        searchQuery += "                            'term' : {";
+        searchQuery += "                                'location' : '{{keyword}}'";
+        searchQuery += "                            }";
+        searchQuery += "                        },";
+        searchQuery += "                        {";
+        searchQuery += "                            'term' : {";
+        searchQuery += "                                'location_tokens' : '{{keyword}}'";
+        searchQuery += "                            }";
+        searchQuery += "                        }";
+        searchQuery += "                    ]";
         searchQuery += "                }";
-        searchQuery += "            ]";
-        searchQuery += "        }";
-        searchQuery += "    },";
-        searchQuery += "    'sort' : [";
-        searchQuery += "        {";
-        searchQuery += "            '_geo_distance': {";
-        searchQuery += "                'latlon' : {";
-        searchQuery += "                    'lat': {{latitude}},";
-        searchQuery += "                    'lon': {{longitude}}";
-        searchQuery += "                },";
-        searchQuery += "                'order': 'asc',";
-        searchQuery += "                'unit': 'm',";
-        searchQuery += "                'distance_type' : 'plane'";
+        searchQuery += "            },";
+        searchQuery += "            'script_score' : {";
+        searchQuery += "                'script' : {";
+        searchQuery += "                    'params' : {";
+        searchQuery += "                        'lat' : {{latitude}},";
+        searchQuery += "                        'lon' : {{longitude}}";
+        searchQuery += "                    },";
+        searchQuery += "                    'source' : '1 / (0.2 * doc[?latlon?].planeDistance(params.lat,params.lon) + 1)'";
+        searchQuery += "                }";
         searchQuery += "            }";
         searchQuery += "        }";
-        searchQuery += "    ],";
+        searchQuery += "    },";
         searchQuery += "    'size' : {{size}}";
         searchQuery += "}";
         searchQuery = searchQuery.replace("'","\"");
-        request.setScript(searchQuery);
-        System.out.println(searchQuery);
+        searchQuery = searchQuery.replace("?","\'");
+
 
 
         Map<String, Object> scriptParams = new HashMap<>();
@@ -134,6 +134,9 @@ public class MapSearchRepository {
         scriptParams.put("longitude", longitude);
         scriptParams.put("size", 100);
         request.setScriptParams(scriptParams);
+        System.out.println(scriptParams);
+        request.setScript(searchQuery);
+        System.out.println(searchQuery);
 
         restHighLevelClient.searchTemplateAsync(request, RequestOptions.DEFAULT, listener);
     }
