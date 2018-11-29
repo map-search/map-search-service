@@ -4,10 +4,14 @@ package com.naver.mapsearch.mapsearchservice.controller;
 import com.naver.mapsearch.mapsearchservice.domain.MapSearch;
 import com.naver.mapsearch.mapsearchservice.service.MapSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Component
 public class MapSearchHandler {
@@ -25,9 +29,9 @@ public class MapSearchHandler {
 
         String keyword = serverRequest.pathVariable("keyword");
 
-        Mono<MapSearch> searchResult = null; //MapSearchRepository 결과값
+        Mono<List<MapSearch>> searchResult = mapSearchService.searchWithKeyword(keyword); //MapSearchRepository 결과값
 
-        return ServerResponse.ok().body(searchResult, MapSearch.class);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(searchResult.flatMapMany(Flux::fromIterable), MapSearch.class);
     }
 
     public Mono<ServerResponse> searchWithKeywordAndLatLon(ServerRequest serverRequest) {
