@@ -41,6 +41,7 @@ hs_err_pid*
 *.iml
 *.ipr
 /out/
+/logs/
 
 ### NetBeans ###
 /nbproject/private/

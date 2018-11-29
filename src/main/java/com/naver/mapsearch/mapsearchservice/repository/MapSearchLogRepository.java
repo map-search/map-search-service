@@ -1,18 +1,30 @@
 package com.naver.mapsearch.mapsearchservice.repository;
 
-import com.naver.mapsearch.mapsearchservice.controller.MapSearchHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.naver.mapsearch.mapsearchservice.domain.MapSearchLog;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 public class MapSearchLogRepository {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapSearchHandler.class);
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    public void saveSearchLog(String ip, String keyword, Double latitude, Double longitude) {
+    public void saveSearchLog(String ip, String keyword, Double latitude, Double longitude)  {
 
-        String log_template = ip + ", " + keyword + ", " + latitude.toString() + ", " + longitude.toString();
-        LOGGER.info("mapsearch 로그임!! : {}", log_template);
+        MapSearchLog mapSearchLog = new MapSearchLog(ip, keyword, latitude, longitude);
+
+        String jsonMapSearchLog = null;
+        try {
+            jsonMapSearchLog = objectMapper.writeValueAsString(mapSearchLog);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        log.info("MapSearchLogJSON : {}", jsonMapSearchLog);
     }
 }
