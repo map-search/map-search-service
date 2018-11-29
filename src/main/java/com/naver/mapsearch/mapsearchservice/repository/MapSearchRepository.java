@@ -71,6 +71,73 @@ public class MapSearchRepository {
         restHighLevelClient.searchTemplateAsync(request, RequestOptions.DEFAULT, listener);
     }
 
+
+
+    public Mono<List<MapSearch>> searchWithKeywordAndLatLon(String keyword, Double latitude, Double longitude) {
+
+        return  Mono.create(sink -> {
+            try {
+                searchQueryByKeywordAndLatLon(keyword, latitude, longitude, listenerToSink(sink));
+            } catch(Exception e) {
+                sink.error(e);
+            }
+        });
+    }
+
+    private void searchQueryByKeywordAndLatLon(String keyword, Double latitude, Double longitude,
+                                               ActionListener<SearchTemplateResponse> listener)throws Exception{
+
+        SearchTemplateRequest request = new SearchTemplateRequest();
+        request.setRequest(new SearchRequest(INDEX));
+        request.setScriptType(ScriptType.INLINE);
+        String searchQuery = "";
+        searchQuery += "{";
+        searchQuery += "    'query' : {";
+        searchQuery += "        'bool' : {";
+        searchQuery += "            'should': [";
+        searchQuery += "                {";
+        searchQuery += "                    'term': {";
+        searchQuery += "                        'location' : '{{keyword}}'";
+        searchQuery += "                    }";
+        searchQuery += "                },";
+        searchQuery += "                {";
+        searchQuery += "                    'term' : {";
+        searchQuery += "                        'location_tokens': '{{keyword}}'";
+        searchQuery += "                    }";
+        searchQuery += "                }";
+        searchQuery += "            ]";
+        searchQuery += "        }";
+        searchQuery += "    },";
+        searchQuery += "    'sort' : [";
+        searchQuery += "        {";
+        searchQuery += "            '_geo_distance': {";
+        searchQuery += "                'latlon' : {";
+        searchQuery += "                    'lat': {{latitude}},";
+        searchQuery += "                    'lon': {{longitude}}";
+        searchQuery += "                },";
+        searchQuery += "                'order': 'asc',";
+        searchQuery += "                'unit': 'm',";
+        searchQuery += "                'distance_type' : 'plane'";
+        searchQuery += "            }";
+        searchQuery += "        }";
+        searchQuery += "    ],";
+        searchQuery += "    'size' : {{size}}";
+        searchQuery += "}";
+        searchQuery = searchQuery.replace("'","\"");
+        request.setScript(searchQuery);
+        System.out.println(searchQuery);
+
+
+        Map<String, Object> scriptParams = new HashMap<>();
+        scriptParams.put("keyword", keyword);
+        scriptParams.put("latitude", latitude);
+        scriptParams.put("longitude", longitude);
+        scriptParams.put("size", 100);
+        request.setScriptParams(scriptParams);
+
+        restHighLevelClient.searchTemplateAsync(request, RequestOptions.DEFAULT, listener);
+    }
+
     private ActionListener<SearchTemplateResponse> listenerToSink(MonoSink<List<MapSearch>> sink) {
         return new ActionListener<SearchTemplateResponse>() {
             @Override
@@ -79,20 +146,21 @@ public class MapSearchRepository {
                 SearchResponse searchResponse = response.getResponse();
                 SearchHits hits = searchResponse.getHits();
                 SearchHit[] searchHits = hits.getHits();
+                System.out.println(searchHits);
 
                 List<MapSearch> mapSearchList = new ArrayList<>();
                 for (SearchHit hit : searchHits) {
 
                     // do something with the SearchHit
                     Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-                    //System.out.println(sourceAsMap);
+                    System.out.println(sourceAsMap);
                     String map_location = (String) sourceAsMap.get("location");
                     List<String> map_location_tokens = (List<String>) sourceAsMap.get("location_tokens");
                     Map<String, Double> map_latlon = (Map<String, Double>) sourceAsMap.get("latlon");
                     Double map_latitude = map_latlon.get("lat");
                     Double map_longitude = map_latlon.get("lon");
-                    //System.out.println(map_latitude);
-                    //System.out.println(map_longitude);
+                    System.out.println(map_latitude);
+                    System.out.println(map_longitude);
                     MapSearch mapSearch  = new MapSearch(map_location, map_location_tokens,map_latitude, map_longitude);
 
                     mapSearchList.add(mapSearch);
@@ -110,5 +178,6 @@ public class MapSearchRepository {
             }
         };
     }
+
 
 }

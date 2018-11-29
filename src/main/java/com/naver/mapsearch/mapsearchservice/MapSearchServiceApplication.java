@@ -11,5 +11,7 @@ public class MapSearchServiceApplication {
     public static void main(String[] args) {
 
         SpringApplication.run(MapSearchServiceApplication.class, args);
+
+        //log.info("helloworld{}", 100);
     }
 }

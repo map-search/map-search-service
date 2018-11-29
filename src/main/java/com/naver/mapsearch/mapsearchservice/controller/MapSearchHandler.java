@@ -40,9 +40,12 @@ public class MapSearchHandler {
         Double latitude = Double.parseDouble(serverRequest.pathVariable("latitude"));
         Double longitude = Double.parseDouble(serverRequest.pathVariable("longitude"));
 
+        System.out.println("keyword : " + keyword);
+        System.out.println("latitude : " + latitude);
+        System.out.println("longitude : " + longitude);
 
-        Mono<MapSearch> searchResult = null; //MapSearchRepository 결과값
+        Mono<List<MapSearch>> searchResult = mapSearchService.searchWithKeywordAndLatLon(keyword, latitude, longitude); //MapSearchRepository 결과값
 
-        return ServerResponse.ok().body(searchResult, MapSearch.class);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(searchResult.flatMapMany(Flux::fromIterable), MapSearch.class);
     }
 }

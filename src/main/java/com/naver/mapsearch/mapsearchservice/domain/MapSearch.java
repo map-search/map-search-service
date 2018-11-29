@@ -55,7 +55,7 @@ public class MapSearch {
     public String toString() {
         return "MapSearch{" +
                 "location='" + location + '\'' +
-                ", location_tokens=" + location_tokens +
+                ", location_tokens=" + location_tokens +    
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 '}';

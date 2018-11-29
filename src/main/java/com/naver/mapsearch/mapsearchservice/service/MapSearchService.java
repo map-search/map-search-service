@@ -23,4 +23,9 @@ public class MapSearchService {
 
         return mapSearchRepository.searchWithKeyword(keyword);
     }
+
+    public Mono<List<MapSearch>> searchWithKeywordAndLatLon(String keyword, Double latitude, Double longitude) {
+
+        return mapSearchRepository.searchWithKeywordAndLatLon(keyword,latitude,longitude);
+    }
 }
