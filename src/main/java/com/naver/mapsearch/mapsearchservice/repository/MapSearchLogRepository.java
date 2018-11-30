@@ -9,7 +9,7 @@ public class MapSearchLogRepository {
 
     public void saveSearchLog(String ip, String keyword, Double latitude, Double longitude)  {
 
-        String SearchLogFormat = String.format("ip:%s,keyword:%s,latitude:%f,longitude:%f",ip,keyword,latitude,longitude);
-        log.info("MapSearchLogJSON : {}", SearchLogFormat);
+        String searchLogFormat = String.format("ip:%s,keyword:%s,latitude:%f,longitude:%f",ip,keyword,latitude,longitude);
+        log.info("MapSearchLogJSON : {}", searchLogFormat);
     }
 }
